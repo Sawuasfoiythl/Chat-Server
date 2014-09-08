@@ -42,6 +42,8 @@ import javax.xml.bind.DatatypeConverter;
 import com.sawuasfoiythl.chatServer.networking.In;
 import com.sawuasfoiythl.chatServer.networking.Out;
 import com.sawuasfoiythl.chatServer.resources.ResourceLoader;
+import com.sawuasfoiythl.chatServer.updater.Updater;
+import com.sawuasfoiythl.chatServer.util.Utils;
 
 public class ChatClient extends JFrame implements ActionListener {
 
@@ -49,7 +51,7 @@ public class ChatClient extends JFrame implements ActionListener {
 	private boolean loggingHasStarted = false;
 	private int dupeCheck = 0;
 
-	public static String version = "8.";
+	public static String version = "09";
 	public static String trueVersion = "Alpha v8";
 
 	public static String screenName;
@@ -91,14 +93,17 @@ public class ChatClient extends JFrame implements ActionListener {
 
 	// socket for connection to chat server
 	private Socket socket;
+	private Socket updateSocket;
 
 	// for writing to and reading from the server
 	private Out out;
 	private In in;
+	
+	private String hostName;
 
 	public ChatClient(final String screenName, String hostName) {
 
-
+		this.hostName = hostName;
 
 		disguiseName = screenName;
 		// connect to server
@@ -1210,6 +1215,7 @@ public class ChatClient extends JFrame implements ActionListener {
 	public String checkForSwearingBETA(String s) {
 
 		String message = s;
+		for (int loops = 0; loops < message.length(); loops++)
 		for (int i = 0; i < swearWords.length; i++) {
 
 			String replacementWord = "" + swearWords[i].charAt(0);
@@ -1222,6 +1228,25 @@ public class ChatClient extends JFrame implements ActionListener {
 						message.substring(message.indexOf("", message.indexOf(swearWords[i]) + swearWords[i].length()), message.length());
 				timesSworen++;
 			}
+		}
+		
+		if(timesSworen > 4)
+		{
+			if(useDisguise == true){
+				out.println(disguiseName + " has been kicked for swearing :(");
+				timesSworen = 0;
+
+				enteredText.setText(enteredText.getText().substring(0, enteredText.getText().length()-18) + ""+htmlNewLine+"\tYou are no longer disguised to protect you form suspicion "+htmlNewLine+""+htmlNewLine+"" + htmlSuf);
+				//enteredText.setCaretPosition(enteredText.getText().length());
+				useDisguise = false;
+
+
+			} else {
+				out.println(screenName + " has been kicked for swearing :(");
+				closeConnection(true);
+			}
+			//			if(useDisguise == false)
+			//				closeConnection();
 		}
 		return message;
 	}
@@ -1881,13 +1906,50 @@ public class ChatClient extends JFrame implements ActionListener {
 		String s;
 		while ((s = in.readLine()) != null) {
 
+			requestFocus();
+			
 			onlineList(s);
 			checkForCommandUsed(s);
 			if (loggingHasStarted) shouldBeBanned();
 
-			if(s.contains("# Running At "))
-				if(version != ""+s.charAt(14) + s.charAt(15)) closeConnection(true);
+			//if(s.contains("# Running At "))
+			//	if(version != ""+s.charAt(14) + s.charAt(15)) closeConnection(true);
 
+			
+			// TODO This is the Update section
+			if(s.contains("# Update needed:")) {
+				
+					String newJarName = Utils.stringInRange(s, ":", ";");
+					System.out.println(newJarName);
+					//newJarName = "MStC";
+					System.out.println("Acknowledged outdated client");
+					//out.println("# Send Update");
+					System.out.println("Requesting new client");
+					
+					try {
+
+						updateSocket = new Socket(hostName, serverPort+1);
+						Updater updateGetter = new Updater(updateSocket);
+						updateGetter.recieveUpdate(newJarName, updateSocket);
+						System.out.println("Updater Socket Opened");
+						enteredText.setText(enteredText.getText().substring(0, enteredText.getText().length()-18) + "Done M8" + ""+htmlNewLine+"" + htmlSuf);
+
+						
+						JOptionPane option = new JOptionPane("I think the shit is done m8;");
+						JDialog dialog1 = option.createDialog(null, "Updater-y-stuff");
+						dialog1.setVisible(true);
+						
+						
+						break;
+						
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					
+							
+			}
 
 			if(s.startsWith("<font color=green>SERVER:")) {
 				if (s.contains("DEVCLIENT")) {
@@ -2016,7 +2078,7 @@ public class ChatClient extends JFrame implements ActionListener {
 			usrnameProp = s1 + " " + s2;
 			UsrName = s2;
 			if((s2.contains("<") || s2.contains(">")) && (Developer == false)){
-				UsrName = (useSine("ROGAR_JPEP", 0.6) + "</font><font color=black>");
+				UsrName = (useSine("I AM NOT A FISH! DERP!", 0.6) + "</font><font color=black>");
 			}
 
 			if (s2.startsWith("useSine") && (Developer)) {
