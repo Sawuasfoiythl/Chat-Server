@@ -38,10 +38,12 @@ import javax.swing.JTextField;
 
 import com.sawuasfoiythl.chatServer.networking.Connection;
 import com.sawuasfoiythl.chatServer.networking.ConnectionListener;
+import com.sawuasfoiythl.chatServer.updater.Updater;
 
 public class ChatServer{
 
-	public static String version = "8.";
+	public static String version = "09";
+	public static String versionName = "MStC";
 
 	public static boolean serverRunning;
 	public static ServerSocket mainServerSocket;
@@ -69,6 +71,10 @@ public class ChatServer{
 
 		Vector<Connection> connections        = new Vector<Connection>();
 		ServerSocket serverSocket             = new ServerSocket(serverPort);
+
+		ServerSocket updateSocket             = new ServerSocket(serverPort+1);
+		
+		
 		ConnectionListener connectionListener = new ConnectionListener(connections);
 
 		mainServerSocket = serverSocket;
@@ -124,6 +130,7 @@ public class ChatServer{
 
 				if( connection.in.readLine().equals("Client running at :" + version)) {
 
+					System.out.println("WORKING??!?!?");
 					System.out.println(connection.in.readLine());
 
 
@@ -133,6 +140,19 @@ public class ChatServer{
 
 					connections.add(connection);
 					connection.start();
+				}
+				// init updater
+				else {
+					
+					connection.println("# Update needed:" + versionName+ ";");
+					System.out.println("Found outdated client");
+					//if (connection.in.readLine().equals("# Send Update")) {
+						System.out.println("Sending new client");
+						Socket updateSocketer = updateSocket.accept();
+						Updater updateSender = new Updater(updateSocketer);
+						updateSender.sendUpdate(versionName);
+					//}
+					
 				}
 			}  
 		} catch (SocketException se) {
@@ -205,6 +225,16 @@ public class ChatServer{
 					JDialog dialog = op.createDialog(null, "DEV HASHING KEY");
 					dialog.setVisible(true);
 
+					
+					File file = new File("dev.bat");
+					BufferedWriter wr = new BufferedWriter(new FileWriter(file));
+					wr.write("java -cp Chat"+ version +".jar " + "dev " + DEVPASS);
+					wr.newLine();
+					wr.write("pause");
+					wr.flush();
+					wr.close();
+					
+					
 					/** not for actual use (mind and take it out though)*/
 					getDev();
 				} catch (IOException e) {
