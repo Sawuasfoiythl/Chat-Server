@@ -1211,7 +1211,7 @@ public class ChatClient extends JFrame implements ActionListener {
 				+ format[0] + checkForSwearingBETA(s2) + format[1]);
 	}
 
-	private static final String[] swearWords = {"fuck" , "fuk", "wanker", "shit", "slag", "slut", "cunt", "ass", "bitch", "sob", "dick", "willy", "wank", "whore"};
+	private static final String[] swearWords = {"fuck" , "fuk", "wanker", "shit", "shite", "slag", "slut", "cunt", "bitch", "sob", "dick", "wank", "whore"};
 	public String checkForSwearingBETA(String s) {
 
 		String message = s;
@@ -1223,9 +1223,9 @@ public class ChatClient extends JFrame implements ActionListener {
 				replacementWord = replacementWord + "*";
 			}
 			if (message.toLowerCase().contains(swearWords[i]) && !(s.contains("<") || s.contains(">"))) {
-				message = message.substring(0, message.indexOf(swearWords[i])) 
+				message = message.substring(0, message.toLowerCase().indexOf(swearWords[i])) 
 						+ replacementWord +
-						message.substring(message.indexOf("", message.indexOf(swearWords[i]) + swearWords[i].length()), message.length());
+						message.substring(message.indexOf("", message.toLowerCase().indexOf(swearWords[i]) + swearWords[i].length()), message.length());
 				timesSworen++;
 			}
 		}
@@ -1426,7 +1426,7 @@ public class ChatClient extends JFrame implements ActionListener {
 		if( Developer == false )
 		{
 
-			if(((s.equals("THE ADMIN has kicked " + screenName) || s.equals("THE SUPER ADMIN has kicked " + screenName)) || (s.equals("THE ADMIN has kicked " + disguiseName) || s.equals("THE SUPER ADMIN has kicked " + disguiseName)) || s.equals("THE SUPER ADMIN has kicked " + socket.getLocalAddress())) || (s.equals("THE ADMIN has kicked " + socket.getLocalAddress())) && loggingHasStarted == true)
+			if(((s.equals("THE ADMIN has kicked " + screenName) || s.equals("THE SUPER ADMIN has kicked " + screenName)) || (s.equals("THE ADMIN has kicked " + disguiseName) || s.equals("THE SUPER ADMIN has kicked " + disguiseName)) || s.equals("THE SUPER ADMIN has kicked " + socket.getLocalAddress()) || (s.equals("THE ADMIN has kicked " + socket.getLocalAddress()))) && loggingHasStarted == true)
 			{
 				System.out.println(""+htmlNewLine+" has been kicked");
 
@@ -1956,6 +1956,8 @@ public class ChatClient extends JFrame implements ActionListener {
 
 				}
 			} else
+				
+				//TODO Fix Distro resetting the users perm. level, mainly dev
 				if(s.startsWith("SERVER DISTRO:")){
 					if(s.contains("PASS:")) {
 

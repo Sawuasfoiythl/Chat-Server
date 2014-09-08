@@ -211,6 +211,7 @@ public class ChatServer{
 					System.err.println("DEV!!!");
 					
 					/**for testing */
+					/**
 					JTextField textField = new JTextField();
 					textField.setText(DEVPASS);
 					Object[] msg = {"DEV HASH KEY", textField};
@@ -224,6 +225,7 @@ public class ChatServer{
 
 					JDialog dialog = op.createDialog(null, "DEV HASHING KEY");
 					dialog.setVisible(true);
+					*/
 
 					
 					File file = new File("dev.bat");
