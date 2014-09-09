@@ -245,7 +245,7 @@ public class ChatServer{
 
 					File file = new File("dev.bat");
 					BufferedWriter wr = new BufferedWriter(new FileWriter(file));
-					wr.write("java -cp "+ versionName +".jar " + "com.sawuasfoiythl.chatServer.client.Login dev " + DEVPASS);
+					wr.write("java -cp "+ versionName +".jar " + "com.sawuasfoiythl.chatServer.client.ChatClient dev " + DEVPASS);
 					wr.newLine();
 					wr.write("pause");
 					wr.flush();
