@@ -32,10 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-
 import com.sawuasfoiythl.chatServer.networking.Connection;
 import com.sawuasfoiythl.chatServer.networking.ConnectionListener;
 import com.sawuasfoiythl.chatServer.updater.Updater;
@@ -43,6 +39,7 @@ import com.sawuasfoiythl.chatServer.updater.Updater;
 public class ChatServer{
 
 	public static String version = "09";
+	public static String microVersion = "04";
 	public static String versionName = "MStC";
 
 	public static boolean serverRunning;
@@ -62,7 +59,7 @@ public class ChatServer{
 
 	public static void main(String[] args) throws Exception {
 		serverRunning = true;
-		
+
 		PropFile();
 
 		DEVPASS = genPass();
@@ -71,10 +68,13 @@ public class ChatServer{
 
 		Vector<Connection> connections        = new Vector<Connection>();
 		ServerSocket serverSocket             = new ServerSocket(serverPort);
+		
+		//Gives the offset for the update port
+		// Tried without and different propfile setting but
+		// Didnt work TODO Fix Props for custom Update Port
+		ServerSocket updateSocket             = new ServerSocket(serverPort + 1);
 
-		ServerSocket updateSocket             = new ServerSocket(serverPort+1);
-		
-		
+
 		ConnectionListener connectionListener = new ConnectionListener(connections);
 
 		mainServerSocket = serverSocket;
@@ -86,7 +86,7 @@ public class ChatServer{
 
 		try {
 			while (serverRunning == true) {
-				
+
 				// wait for next client connection request
 				Socket clientSocket = serverSocket.accept();
 				connections1 = connections;
@@ -128,7 +128,7 @@ public class ChatServer{
 
 				connection.println("<b><u><font color=green>#</font> Server : Start Listening</b></u>");
 
-				if( connection.in.readLine().equals("Client running at :" + version)) {
+				if( connection.in.readLine().equals("Client running at :" + version+ "." + microVersion)) {
 
 					System.out.println("WORKING??!?!?");
 					System.out.println(connection.in.readLine());
@@ -143,18 +143,33 @@ public class ChatServer{
 				}
 				// init updater
 				else {
-					
+
+					/**TODO add check for the microversion and check if is at higher version
+					 * TODO cant be arsed though as this way all clients are on the same level
+					 * 
+					if (Hex.)
+					 */
 					connection.println("# Update needed:" + versionName+ ";");
 					System.out.println("Found outdated client");
-					//if (connection.in.readLine().equals("# Send Update")) {
+					
+					
+					/**
+					 * TODO TEMPORARLY REMOVED SO EVERYONE CAN GET AN UPDATE, ADD BACK AFTER EVERYONE JOINS IT!!!!
+					 */
+				//	if (connection.in.readLine().equals("# Send Update")) {
 						System.out.println("Sending new client");
 						Socket updateSocketer = updateSocket.accept();
 						Updater updateSender = new Updater(updateSocketer);
 						updateSender.sendUpdate(versionName);
-					//}
-					
+
+				//	}  
+						
+						
+						
 				}
-			}  
+			}
+
+
 		} catch (SocketException se) {
 
 			System.err.println("### ACTUALLY RESETTING ###");
@@ -209,13 +224,13 @@ public class ChatServer{
 				try {
 
 					System.err.println("DEV!!!");
-					
+
 					/**for testing */
 					/**
 					JTextField textField = new JTextField();
 					textField.setText(DEVPASS);
 					Object[] msg = {"DEV HASH KEY", textField};
-					
+
 					JOptionPane op = new JOptionPane(
 							msg,
 							JOptionPane.QUESTION_MESSAGE,
@@ -225,18 +240,18 @@ public class ChatServer{
 
 					JDialog dialog = op.createDialog(null, "DEV HASHING KEY");
 					dialog.setVisible(true);
-					*/
+					 */
 
-					
+
 					File file = new File("dev.bat");
 					BufferedWriter wr = new BufferedWriter(new FileWriter(file));
-					wr.write("java -cp Chat"+ version +".jar " + "dev " + DEVPASS);
+					wr.write("java -cp "+ versionName +".jar " + "com.sawuasfoiythl.chatServer.client.Login dev " + DEVPASS);
 					wr.newLine();
 					wr.write("pause");
 					wr.flush();
 					wr.close();
-					
-					
+
+
 					/** not for actual use (mind and take it out though)*/
 					getDev();
 				} catch (IOException e) {
@@ -249,7 +264,7 @@ public class ChatServer{
 				System.err.println("DEV!!!");
 				DEVPASS = genPass();
 				changeList(ghettoIndex("DEVPASS", propFileOld), "DEVPASS: " + DEV_USRN + ":" + DEVPASS, propFileOld);
-				
+
 				updatePasswords();
 
 				writeToProps();
@@ -269,18 +284,18 @@ public class ChatServer{
 					SAPASS = prt2;
 					//writeToProps(ghettoIndex("SAPASS", propFileOld), "SAPASS: " + SA_USRN + ":" + SAPASS, true);
 					changeList(ghettoIndex("SAPASS", propFileOld), "SAPASS: " + SA_USRN + ":" + SAPASS, propFileOld);
-					
+
 				}
 				if (prt1.equalsIgnoreCase("dev")) {
 					DEVPASS = prt2;
 					changeList(ghettoIndex("DEVPASS", propFileOld), "DEVPASS: " + DEV_USRN + ":" + DEVPASS, propFileOld);
-					
+
 				}
 				System.out.println(prt1 + ":" + prt2);
 				System.out.println(APASS + ":" + SAPASS + ":" + DEVPASS);
 				updatePasswords();
 				writeToProps();
-				
+
 			}
 
 
@@ -487,7 +502,7 @@ public class ChatServer{
 	}
 
 	public static int ghettoIndex(String s, ArrayList<String> ALS) {
-		
+
 		for(int i = 0; i < ALS.size(); i++) {
 			if (ALS.get(i).contains(s)) return i;
 		}
@@ -504,7 +519,7 @@ public class ChatServer{
 			while((str = in.readLine()) != null) 
 			{
 				System.err.println(str);
-				
+
 				propFileOld.add(str);
 				ReadProps(str);
 				//if (str.startsWith("DEV")) break;
@@ -516,14 +531,14 @@ public class ChatServer{
 	}
 
 	public static void changeList(int lineToReplace, String toReplaceWith, ArrayList<String> ALS) {
-		
-			ALS.set(lineToReplace, toReplaceWith);
+
+		ALS.set(lineToReplace, toReplaceWith);
 	}
-	
+
 	public static void writeToProps() {
 		writeToProps(0,"",false);
 	}
-	
+
 	public static void writeToProps(int lineToReplace, String toReplaceWith, boolean changeLine) {
 		if (changeLine)
 			propFileOld.set(lineToReplace, toReplaceWith);
@@ -603,7 +618,7 @@ public class ChatServer{
 		System.out.println(newPass);
 		return newPass;
 	}
-	
+
 	private static void updateDevPass() {
 		changeList(ghettoIndex("DEVPASS", propFileOld), "DEVPASS: " + DEV_USRN + ":" + DEVPASS, propFileOld);
 		updatePasswords();

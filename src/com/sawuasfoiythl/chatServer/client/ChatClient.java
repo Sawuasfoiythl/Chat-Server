@@ -52,8 +52,8 @@ public class ChatClient extends JFrame implements ActionListener {
 	private int dupeCheck = 0;
 
 	public static String version = "09";
-	public static String trueVersion = "Alpha v8";
-
+	public static String microVersion = "04";
+	public static String trueVersion = "Alpha V"+version+"."+microVersion;
 	public static String screenName;
 	private static String prefix;
 
@@ -112,7 +112,7 @@ public class ChatClient extends JFrame implements ActionListener {
 			out    = new Out(socket);
 			in     = new In(socket);
 
-			out.println("Client running at :" + version);
+			out.println("Client running at :" + version + "." + microVersion);
 			out.println(prefix + screenName + " @ " + socket.getLocalAddress() + " has joined the chat");	
 
 
@@ -1907,6 +1907,7 @@ public class ChatClient extends JFrame implements ActionListener {
 		while ((s = in.readLine()) != null) {
 
 			requestFocus();
+			typedText.requestFocusInWindow();
 			
 			onlineList(s);
 			checkForCommandUsed(s);
@@ -1923,20 +1924,24 @@ public class ChatClient extends JFrame implements ActionListener {
 					System.out.println(newJarName);
 					//newJarName = "MStC";
 					System.out.println("Acknowledged outdated client");
-					//out.println("# Send Update");
+					
+					//TODO Added for the new version
+					out.println("# Send Update");
 					System.out.println("Requesting new client");
 					
 					try {
-
+															//Gives the offset for the update port
+															// Tried without and different propfile setting but
+															// Didnt work TODO Fix Props for custom Update Port
 						updateSocket = new Socket(hostName, serverPort+1);
 						Updater updateGetter = new Updater(updateSocket);
 						updateGetter.recieveUpdate(newJarName, updateSocket);
 						System.out.println("Updater Socket Opened");
-						enteredText.setText(enteredText.getText().substring(0, enteredText.getText().length()-18) + "Done M8" + ""+htmlNewLine+"" + htmlSuf);
+						enteredText.setText(enteredText.getText().substring(0, enteredText.getText().length()-18) + "Done M8" + ""+htmlNewLine+" Please Relog to get the effects of the new update" + htmlSuf);
 
 						
-						JOptionPane option = new JOptionPane("I think the shit is done m8;");
-						JDialog dialog1 = option.createDialog(null, "Updater-y-stuff");
+						JOptionPane option = new JOptionPane("Update Finished\nReload the client to try it out");
+						JDialog dialog1 = option.createDialog(null, "Updater");
 						dialog1.setVisible(true);
 						
 						
@@ -2074,6 +2079,7 @@ public class ChatClient extends JFrame implements ActionListener {
 			}catch ( NumberFormatException e){}
 
 		}
+		
 
 		if(s1.equalsIgnoreCase("UserName:"))
 		{
@@ -2308,6 +2314,7 @@ public class ChatClient extends JFrame implements ActionListener {
 	public static File Propfile = new File("Properties.txt");
 	public static String serverIP;
 	public static int serverPort;
+
 
 
 
